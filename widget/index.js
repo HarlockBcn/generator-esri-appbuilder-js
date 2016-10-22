@@ -119,7 +119,7 @@ var WidgetGenerator = Base.extend({
       name: 'jsVersion',
       type: 'list',
       message: 'Which JavaScript  syntax version would you like to develop in?',
-      choices: ['ES5', 'ES2015']
+      choices: ['ES5', 'ES2015', 'TS']
     }];
 
     this.prompt(prompts, function (props) {
@@ -175,12 +175,20 @@ var WidgetGenerator = Base.extend({
     if (this.hasLocale) {
       this.template('nls/_strings.js', path.join(basePath, 'nls/strings.js'));
     }
+    if (this.jsVersion === 'TS') {
+      this.template('_WidgetImpl.ts', path.join(basePath, 'WidgetImpl.ts'));
+      this.copy('Utils.ts', path.join(basePath, 'Utils.ts'));
+    }
+
     this.copy('images/icon.png', path.join(basePath, 'images/icon.png'));
     this.template('_manifest.json', path.join(basePath, 'manifest.json'));
 
     // Settings:
     if(this.hasSettingPage) {
       this.template('setting/_Setting_' + this.jsVersion + '.js', path.join(basePath, 'setting/Setting.js'));
+      if (this.jsVersion === 'TS') {
+        this.template('setting/_SettingImpl.ts', path.join(basePath, 'setting/SettingImpl.ts'));
+      }
       if (this.hasSettingUIFile) {
         this.template('setting/_Setting.html', path.join(basePath, 'setting/Setting.html'));
       }

@@ -1,3 +1,4 @@
+/* jshint esversion: 2015 */
 import declare from 'dojo/_base/declare';
 import BaseWidget from 'jimu/BaseWidget';
 

@@ -221,14 +221,14 @@ module.exports = Base.extend({
           files: [{
             expand: true,
             src: [
-                'widgets/*.js',
-				'widgets/**/*.js',
-				'widgets/**/**/*.js',
-				'widgets/!**/**/nls/*.js',
-				'themes/*.js',
-				'themes/**/*.js',
-				'themes/**/**/*.js',
-				'themes/!**/**/nls/*.js'
+              'widgets/*.js',
+              'widgets/**/*.js',
+              'widgets/**/**/*.js',
+              'widgets/!**/**/nls/*.js',
+              'themes/*.js',
+              'themes/**/*.js',
+              'themes/**/**/*.js',
+              'themes/!**/**/nls/*.js'
             ],
             dest: 'dist/'
           }]
@@ -236,11 +236,21 @@ module.exports = Base.extend({
       };
       this.gruntfile.insertConfig('babel', JSON.stringify(babelConfig));
 
+      // TYPESCRIPT CONFIG
+      // Config will be read from tsconfig.json
+      var typescriptConfig = {
+        default: {
+          // specifying tsconfig as a boolean will use the 'tsconfig.json' in same folder as Gruntfile.js
+          tsconfig: true
+        }
+      };
+      this.gruntfile.insertConfig('ts', JSON.stringify(typescriptConfig));
+
       // WATCH CONFIG
       this.gruntfile.insertConfig('watch', JSON.stringify({
         main: {
           files: ['widgets/**', 'themes/**'],
-          tasks: ['clean', 'babel', 'copy', 'sync'],
+          tasks: ['clean', 'ts', 'babel', 'copy', 'sync'],
           options: {
             spawn: false,
             atBegin: true
@@ -257,11 +267,11 @@ module.exports = Base.extend({
             'widgets/**/**.css',
             'widgets/**/images/**',
             'widgets/**/nls/**',
-			'themes/**/**.html',
-			'themes/**/**.json',
-			'themes/**/**.css',
-			'themes/**/images/**',
-			'themes/**/nls/**'
+            'themes/**/**.html',
+            'themes/**/**.json',
+            'themes/**/**.css',
+            'themes/**/images/**',
+            'themes/**/nls/**'
           ],
           dest: 'dist/',
           expand: true
@@ -276,6 +286,7 @@ module.exports = Base.extend({
       }));
 
       // load tasks
+      this.gruntfile.loadNpmTasks('grunt-ts');
       this.gruntfile.loadNpmTasks('grunt-babel');
       this.gruntfile.loadNpmTasks('grunt-contrib-clean');
       this.gruntfile.loadNpmTasks('grunt-contrib-copy');
@@ -293,6 +304,12 @@ module.exports = Base.extend({
       this.copy('editorconfig', '.editorconfig');
       this.copy('jshintrc', '.jshintrc');
       this.copy('babelrc', '.babelrc');
+      // Typescript support files
+      this.copy('tsconfig.json', 'tsconfig.json');
+      this.copy('tslint.json', 'tslint.json');
+      this.directory('type-declarations', 'type-declarations');
+      var arcgisVersionDel = this.is3D? '3x':'4x';
+      this.fs.delete('type-declarations/arcgis-js-api-' + arcgisVersionDel + '.d.ts');
     }
   },
 
@@ -308,8 +325,10 @@ module.exports = Base.extend({
       'grunt-contrib-watch',
       'grunt-sync',
       'grunt-babel',
+      'grunt-ts',
       'grunt-contrib-clean',
-      'grunt-contrib-copy'
+      'grunt-contrib-copy',
+      'typescript@^2.0.3'
     ], {
       'saveDev': true
     });
