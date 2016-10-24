@@ -168,6 +168,7 @@ module.exports = Base.extend({
       if (this.abort) {
         return;
       }
+      mkdirp('libs');
       mkdirp('widgets');
       this.config.set('widgetsType', this.widgetsType);
     },
@@ -221,6 +222,7 @@ module.exports = Base.extend({
           files: [{
             expand: true,
             src: [
+              'libs/*.js',
               'widgets/*.js',
               'widgets/**/*.js',
               'widgets/**/**/*.js',
@@ -249,7 +251,7 @@ module.exports = Base.extend({
       // WATCH CONFIG
       this.gruntfile.insertConfig('watch', JSON.stringify({
         main: {
-          files: ['widgets/**', 'themes/**'],
+          files: ['libs/**', 'widgets/**', 'themes/**'],
           tasks: ['clean', 'ts', 'babel', 'copy', 'sync'],
           options: {
             spawn: false,
@@ -262,6 +264,11 @@ module.exports = Base.extend({
       this.gruntfile.insertConfig('copy', JSON.stringify({
         main: {
           src: [
+            'libs/**/**.html',
+            'libs/**/**.json',
+            'libs/**/**.css',
+            'libs/**/images/**',
+            'libs/**/nls/**',
             'widgets/**/**.html',
             'widgets/**/**.json',
             'widgets/**/**.css',

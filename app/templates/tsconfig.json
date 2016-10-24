@@ -4,6 +4,7 @@
     "noImplicitUseStrict": true,
     "baseUrl": ".",
     "files": [
+      "libs/**/*.ts",
       "widgets/**/*.ts"
     ],
     "module": "amd",
