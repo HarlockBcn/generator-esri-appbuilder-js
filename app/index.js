@@ -233,6 +233,13 @@ module.exports = Base.extend({
               'themes/!**/**/nls/*.js'
             ],
             dest: 'dist/'
+          },{
+              'expand': true,
+              'cwd': 'ts-build/',
+              'src': [
+                '**/**.js'
+              ],
+              'dest': 'dist/'
           }]
         }
       };

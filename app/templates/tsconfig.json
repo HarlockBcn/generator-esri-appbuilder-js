@@ -8,12 +8,13 @@
       "widgets/**/*.ts"
     ],
     "module": "amd",
-    "target": "es5",
+    "target": "es6",
+    "lib": ["es6", "dom"],
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": false,
     "sourceMap": true,
     "rootDir": "./",
-    "outDir": "./dist"
+    "outDir": "./ts-build"
   },
   "exclude": [
     "node_modules"
