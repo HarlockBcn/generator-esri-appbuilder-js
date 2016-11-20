@@ -1,6 +1,6 @@
 import BaseWidget = require("jimu/BaseWidget");
 import Map = require("esri/map");
-import { applyMixins } from "./Utils";
+import { applyMixins } from "libs/widgets/utils";
 
 class WidgetImpl extends BaseWidget {
 

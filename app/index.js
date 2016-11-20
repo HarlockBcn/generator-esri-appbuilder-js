@@ -317,6 +317,8 @@ module.exports = Base.extend({
       this.directory('type-declarations', 'type-declarations');
       var arcgisVersionDel = this.is3D? '3x':'4x';
       this.fs.delete('type-declarations/arcgis-js-api-' + arcgisVersionDel + '.d.ts');
+      // libs
+      this.directory('libs', 'libs');
     }
   },
 
