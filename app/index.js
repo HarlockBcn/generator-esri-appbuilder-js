@@ -222,7 +222,7 @@ module.exports = Base.extend({
           files: [{
             expand: true,
             src: [
-              'libs/*.js',
+              'libs/**/*.js',
               'widgets/*.js',
               'widgets/**/*.js',
               'widgets/**/**/*.js',
