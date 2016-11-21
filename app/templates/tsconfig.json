@@ -7,6 +7,10 @@
       "libs/**/*.ts",
       "widgets/**/*.ts"
     ],
+    "types": [
+      "type-declarations/index.d.ts",
+      "typings/index.d.ts"
+    ],
     "module": "amd",
     "target": "es6",
     "lib": ["es6", "dom"],

@@ -69,7 +69,7 @@ module.exports = Base.extend({
         if (currentAnswers.widgetsType === 'is3d') {
           wabDir = path.join(homedir, 'WebAppBuilderForArcGIS');
         } else {
-          wabDir = path.join(homedir, 'arcgis-web-appbuilder-1.3');
+          wabDir = path.join(homedir, 'WebAppBuilderForArcGIS');
         }
         return wabDir;
       },
@@ -169,6 +169,8 @@ module.exports = Base.extend({
         return;
       }
       mkdirp('libs');
+      mkdirp('libs/vendor');
+      mkdirp('libs/vendor-amd');
       mkdirp('widgets');
       this.config.set('widgetsType', this.widgetsType);
     },
@@ -223,6 +225,8 @@ module.exports = Base.extend({
             expand: true,
             src: [
               'libs/**/*.js',
+              '!libs/vendor/**/*',
+              '!libs/vendor-amd/**/*',
               'widgets/*.js',
               'widgets/**/*.js',
               'widgets/**/**/*.js',
@@ -246,36 +250,80 @@ module.exports = Base.extend({
       this.gruntfile.insertConfig('babel', JSON.stringify(babelConfig));
 
       // TYPESCRIPT CONFIG
-      // Config will be read from tsconfig.json
+      var tsconfigJson = JSON.parse(this.read('tsconfig.json'));
+
+      // This configuration seems to be the only way to use grunt-ts and compile only changed files
       var typescriptConfig = {
-        default: {
-          // specifying tsconfig as a boolean will use the 'tsconfig.json' in same folder as Gruntfile.js
-          tsconfig: true
+        main: {
+          //
+          tsconfig: false,
+          src: tsconfigJson.compilerOptions.files.concat(tsconfigJson.compilerOptions.types),
+          outDir: './ts-build',
+          options: Object.assign({
+            fast: 'never'}, tsconfigJson.compilerOptions)
         }
       };
       this.gruntfile.insertConfig('ts', JSON.stringify(typescriptConfig));
 
       // WATCH CONFIG
       this.gruntfile.insertConfig('watch', JSON.stringify({
-        main: {
-          files: ['libs/**', 'widgets/**', 'themes/**'],
-          tasks: ['clean', 'ts', 'babel', 'copy', 'sync'],
-          options: {
+        // Babel will compile ts files compiled to es6
+        'main-no-ts': {
+          files: [
+            'ts-build/**/*.*',
+            'libs/**/*.*',
+            'widgets/**/*.*',
+            'themes/**/*.*',
+            '!libs/**/*.ts',
+            '!widgets/**/*.ts',
+            '!themes/**/*.ts'
+          ], tasks: [
+            // It's more optimal to execute clean manually when needed
+            // and only compile changed files.
+            // 'clean',
+            'babel',
+            'copy',
+            'sync'
+          ], options: {
             spawn: false,
             atBegin: true
           }
-        }
-      }));
+      }, 'main-ts': {
+          'files': [
+            'libs/**/*.ts',
+            'widgets/**/*.ts',
+            'themes/**/*.ts'
+          ],
+          'tasks': [
+            'ts'
+          ],
+          'options': {
+            'spawn': false,
+            'atBegin': true
+          }
+      }}));
 
       // COPY CONFIG
       this.gruntfile.insertConfig('copy', JSON.stringify({
         main: {
           src: [
+            'libs/vendor/**/*.*',
+            'libs/vendor-amd/**/*.*',
             'libs/**/**.html',
             'libs/**/**.json',
             'libs/**/**.css',
             'libs/**/images/**',
             'libs/**/nls/**',
+            '!libs/vendor/**/**.html',
+            '!libs/vendor/**/**.json',
+            '!libs/vendor/**/**.css',
+            '!libs/vendor/**/images/**',
+            '!libs/vendor/**/nls/**',
+            '!libs/vendor-amd/**/**.html',
+            '!libs/vendor-amd/**/**.json',
+            '!libs/vendor-amd/**/**.css',
+            '!libs/vendor-amd/**/images/**',
+            '!libs/vendor-amd/**/nls/**',
             'widgets/**/**.html',
             'widgets/**/**.json',
             'widgets/**/**.css',
@@ -308,7 +356,13 @@ module.exports = Base.extend({
       this.gruntfile.loadNpmTasks('grunt-sync');
 
       // register tasks
-      this.gruntfile.registerTask('default', ['watch']);
+      // Only clean at begin
+      this.gruntfile.registerTask('default', ['clean', 'watch']);
+
+      // Add javascript code
+      var baseGruntfile = this.read('gruntfile.js');
+      this.gruntfile.prependJavaScript(baseGruntfile);
+
     },
 
     projectfiles: function() {
@@ -322,8 +376,12 @@ module.exports = Base.extend({
       this.copy('tsconfig.json', 'tsconfig.json');
       this.copy('tslint.json', 'tslint.json');
       this.directory('type-declarations', 'type-declarations');
+      var arcgisVersion = this.is3D? '4x':'3x';
       var arcgisVersionDel = this.is3D? '3x':'4x';
       this.fs.delete('type-declarations/arcgis-js-api-' + arcgisVersionDel + '.d.ts');
+      this.fs.copy('type-declarations/index-' + arcgisVersion + '.d.ts', 'type-declarations/index.d.ts');
+      this.fs.delete('type-declarations/index-3x.d.ts');
+      this.fs.delete('type-declarations/index-4x.d.ts');
       // libs
       this.directory('libs', 'libs');
     }
