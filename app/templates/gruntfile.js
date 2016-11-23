@@ -23,7 +23,6 @@
   }, 200);
 
   grunt.event.on('watch', function(action, filepath) {
-    grunt.log.writeln('On change!!!' + filepath);
     if (filepath.endsWith('.ts')) {
       changedFiles.ts[filepath] = action;
 

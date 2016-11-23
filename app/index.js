@@ -270,7 +270,6 @@ module.exports = Base.extend({
         // Babel will compile ts files compiled to es6
         'main-no-ts': {
           files: [
-            'ts-build/**/*.*',
             'libs/**/*.*',
             'widgets/**/*.*',
             'themes/**/*.*',
@@ -295,7 +294,10 @@ module.exports = Base.extend({
             'themes/**/*.ts'
           ],
           'tasks': [
-            'ts'
+            'ts',
+            'babel',
+            'copy',
+            'sync'
           ],
           'options': {
             'spawn': false,
@@ -343,7 +345,10 @@ module.exports = Base.extend({
       // CLEAN CONFIG
       this.gruntfile.insertConfig('clean', JSON.stringify({
         dist: {
-          src: 'dist/**'
+          src: [
+            'dist/**',
+            'ts-build/**'
+          ]
         }
       }));
 
