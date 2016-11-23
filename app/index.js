@@ -9,13 +9,13 @@ var fs = require('fs');
 var mkdirp = require('mkdirp');
 
 function getDirectories(srcpath) {
-  return fs.readdirSync(srcpath).filter(function(file) {
+  return fs.readdirSync(srcpath).filter(function (file) {
     return fs.statSync(path.join(srcpath, file)).isDirectory();
   });
 }
 
 module.exports = Base.extend({
-  initializing: function() {
+  initializing: function () {
     // check for existence of package.json
     try {
       fs.accessSync('./package.json', fs.F_OK);
@@ -25,7 +25,7 @@ module.exports = Base.extend({
     }
   },
 
-  prompting: function() {
+  prompting: function () {
     var done = this.async();
     var self = this;
 
@@ -38,33 +38,33 @@ module.exports = Base.extend({
       type: 'confirm',
       default: true,
       message: 'No package.json found. Would you like to abort and run npm init first?',
-      when: function() {
+      when: function () {
         return !self.hasPackageJson;
       }
     }, {
       type: 'list',
       choices: [
         {
-        value: 'is2d',
-        name: '2D'
+          value: 'is2d',
+          name: '2D'
         },
         {
-        value: 'is3d',
-        name: '3D'
+          value: 'is3d',
+          name: '3D'
         }
       ],
       name: 'widgetsType',
       message: 'Type of widget(s) to be generated:',
-      when: function(currentAnswers) {
+      when: function (currentAnswers) {
         return !currentAnswers.abort;
       }
     }, {
-      when: function(currentAnswers) {
+      when: function (currentAnswers) {
         return !currentAnswers.abort;
       },
       name: 'wabRoot',
       message: 'Web AppBuilder install root:',
-      'default': function(currentAnswers) {
+      'default': function (currentAnswers) {
         var wabDir;
         if (currentAnswers.widgetsType === 'is3d') {
           wabDir = path.join(homedir, 'WebAppBuilderForArcGIS');
@@ -73,13 +73,13 @@ module.exports = Base.extend({
         }
         return wabDir;
       },
-      validate: function(wabPath) {
+      validate: function (wabPath) {
         // make sure input directory and the following paths exist:
         // * server
         // * client
         var paths = [wabPath, path.join(wabPath, 'server'), path.join(wabPath, 'client')];
         try {
-          paths.forEach(function(path) {
+          paths.forEach(function (path) {
             fs.accessSync(path, fs.F_OK);
           });
           return true;
@@ -89,7 +89,7 @@ module.exports = Base.extend({
         }
       }
     }, {
-      when: function(currentAnswers) {
+      when: function (currentAnswers) {
         if (currentAnswers.abort) {
           return false;
         }
@@ -109,7 +109,7 @@ module.exports = Base.extend({
       name: 'appDirId',
       type: 'list',
       message: 'Web AppBuilder application:',
-      choices: function(currentAnswers) {
+      choices: function (currentAnswers) {
         // Always include option for "None"
         var retArray = [{
           name: 'None',
@@ -118,7 +118,7 @@ module.exports = Base.extend({
         }];
         var appsPath = path.join(currentAnswers.wabRoot, 'server', 'apps');
         var appsDirectories = getDirectories(appsPath);
-        appsDirectories.forEach(function(appDirectory) {
+        appsDirectories.forEach(function (appDirectory) {
           try {
             // get the config file, convert to JSON, and read the title property
             var configPath = path.join(currentAnswers.wabRoot, 'server', 'apps', appDirectory, 'config.json');
@@ -150,7 +150,7 @@ module.exports = Base.extend({
       }
     }];
 
-    this.prompt(prompts, function(props) {
+    this.prompt(prompts, function (props) {
       this.abort = props.abort;
       this.wabRoot = props.wabRoot;
       this.widgetsType = props.widgetsType;
@@ -164,7 +164,7 @@ module.exports = Base.extend({
   },
 
   writing: {
-    app: function() {
+    app: function () {
       if (this.abort) {
         return;
       }
@@ -175,7 +175,7 @@ module.exports = Base.extend({
       this.config.set('widgetsType', this.widgetsType);
     },
 
-    gruntConfig: function() {
+    gruntConfig: function () {
       if (this.abort) {
         return;
       }
@@ -237,13 +237,13 @@ module.exports = Base.extend({
               'themes/!**/**/nls/*.js'
             ],
             dest: 'dist/'
-          },{
-              'expand': true,
-              'cwd': 'ts-build/',
-              'src': [
-                '**/**.js'
-              ],
-              'dest': 'dist/'
+          }, {
+            'expand': true,
+            'cwd': 'ts-build/',
+            'src': [
+              '**/**.js'
+            ],
+            'dest': 'dist/'
           }]
         }
       };
@@ -260,7 +260,8 @@ module.exports = Base.extend({
           src: tsconfigJson.compilerOptions.files.concat(tsconfigJson.compilerOptions.types),
           outDir: './ts-build',
           options: Object.assign({
-            fast: 'never'}, tsconfigJson.compilerOptions)
+            fast: 'never'
+          }, tsconfigJson.compilerOptions)
         }
       };
       this.gruntfile.insertConfig('ts', JSON.stringify(typescriptConfig));
@@ -268,18 +269,16 @@ module.exports = Base.extend({
       // WATCH CONFIG
       this.gruntfile.insertConfig('watch', JSON.stringify({
         // Babel will compile ts files compiled to es6
-        'main-no-ts': {
+        'main': {
           files: [
-            'libs/**/*.*',
-            'widgets/**/*.*',
-            'themes/**/*.*',
-            '!libs/**/*.ts',
-            '!widgets/**/*.ts',
-            '!themes/**/*.ts'
+            'libs/**/*',
+            'widgets/**/*',
+            'themes/**/*'
           ], tasks: [
             // It's more optimal to execute clean manually when needed
             // and only compile changed files.
             // 'clean',
+            'ts',
             'babel',
             'copy',
             'sync'
@@ -287,23 +286,8 @@ module.exports = Base.extend({
             spawn: false,
             atBegin: true
           }
-      }, 'main-ts': {
-          'files': [
-            'libs/**/*.ts',
-            'widgets/**/*.ts',
-            'themes/**/*.ts'
-          ],
-          'tasks': [
-            'ts',
-            'babel',
-            'copy',
-            'sync'
-          ],
-          'options': {
-            'spawn': false,
-            'atBegin': true
-          }
-      }}));
+        }
+      }));
 
       // COPY CONFIG
       this.gruntfile.insertConfig('copy', JSON.stringify({
@@ -370,7 +354,7 @@ module.exports = Base.extend({
 
     },
 
-    projectfiles: function() {
+    projectfiles: function () {
       if (this.abort) {
         return;
       }
@@ -381,8 +365,8 @@ module.exports = Base.extend({
       this.copy('tsconfig.json', 'tsconfig.json');
       this.copy('tslint.json', 'tslint.json');
       this.directory('type-declarations', 'type-declarations');
-      var arcgisVersion = this.is3D? '4x':'3x';
-      var arcgisVersionDel = this.is3D? '3x':'4x';
+      var arcgisVersion = this.is3D ? '4x' : '3x';
+      var arcgisVersionDel = this.is3D ? '3x' : '4x';
       this.fs.delete('type-declarations/arcgis-js-api-' + arcgisVersionDel + '.d.ts');
       this.fs.copy('type-declarations/index-' + arcgisVersion + '.d.ts', 'type-declarations/index.d.ts');
       this.fs.delete('type-declarations/index-3x.d.ts');
@@ -392,7 +376,7 @@ module.exports = Base.extend({
     }
   },
 
-  install: function() {
+  install: function () {
     if (this.abort || this.options['skip-install']) {
       return;
     }
@@ -409,7 +393,7 @@ module.exports = Base.extend({
       'grunt-contrib-copy',
       'typescript@^2.0.3'
     ], {
-      'saveDev': true
-    });
+        'saveDev': true
+      });
   }
 });
