@@ -1,5 +1,5 @@
 import BaseWidget = require("jimu/BaseWidget");
-import { applyMixins } from "libs/widgets/utils";
+import { applyMixins } from "libs/widgets-shared/utils";
 
 class WidgetImpl extends BaseWidget {
 
