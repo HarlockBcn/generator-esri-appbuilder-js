@@ -275,9 +275,7 @@ module.exports = Base.extend({
             'widgets/**/*',
             'themes/**/*'
           ], tasks: [
-            // It's more optimal to execute clean manually when needed
-            // and only compile changed files.
-            // 'clean',
+            'clean',
             'ts',
             'babel',
             'copy',
